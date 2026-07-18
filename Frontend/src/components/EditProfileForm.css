@@ -1,0 +1,316 @@
+/* ============================================
+   EditProfileForm.css
+   Premium SaaS UI — Dark Ambient Edition
+   ============================================ */
+
+/* 1. CSS Variables (Scoped to this component) */
+.edit-profile-card {
+  /* Dark Ambient Background */
+  --epf-bg-page: #0f1117;
+  --epf-bg-card: rgba(22, 25, 34, 0.85);
+  --epf-bg-card-solid: #161922;
+  --epf-surface: rgba(255, 255, 255, 0.03);
+  --epf-surface-hover: rgba(255, 255, 255, 0.06);
+  
+  /* Borders */
+  --epf-border: rgba(255, 255, 255, 0.08);
+  --epf-border-hover: rgba(255, 255, 255, 0.15);
+  --epf-border-focus: rgba(99, 102, 241, 0.5);
+  
+  /* Text Colors */
+  --epf-text-primary: #f1f5f9;
+  --epf-text-secondary: #94a3b8;
+  --epf-text-placeholder: #64748b;
+  
+  /* Accent Gradient (Vibrant Purple-Blue) */
+  --epf-accent-start: #6366f1;
+  --epf-accent-end: #8b5cf6;
+  --epf-accent-glow: rgba(99, 102, 241, 0.25);
+  --epf-accent-hover-start: #4f46e5;
+  --epf-accent-hover-end: #7c3aed;
+  
+  /* Danger */
+  --epf-danger: #ef4444;
+  --epf-danger-hover: #dc2626;
+  
+  /* Shadows & Depth */
+  --epf-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --epf-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --epf-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --epf-shadow-glow: 0 0 0 3px var(--epf-accent-glow), 0 0 20px rgba(99, 102, 241, 0.15);
+  --epf-inner-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  
+  /* Spacing & Typography */
+  --epf-radius: 20px;
+  --epf-radius-sm: 12px;
+  --epf-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --epf-transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  max-width: 520px;
+  width: 100%;
+  margin: 60px auto;
+  padding: 48px;
+  background: var(--epf-bg-card);
+  background-image: 
+    radial-gradient(ellipse at top right, rgba(99, 102, 241, 0.08), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(139, 92, 246, 0.06), transparent 60%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--epf-radius);
+  border: 1px solid var(--epf-border);
+  box-shadow: 
+    var(--epf-shadow-lg),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  animation: epf-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+/* Ambient background glow behind the card */
+.edit-profile-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 100px;
+  background: radial-gradient(ellipse, rgba(99, 102, 241, 0.15), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(40px);
+}
+
+/* 2. Entrance Animation */
+@keyframes epf-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 3. Typography */
+.edit-profile-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--epf-text-primary);
+  margin: 0 0 10px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.edit-profile-card .subtitle {
+  font-size: 15px;
+  color: var(--epf-text-secondary);
+  margin: 0 0 36px 0;
+  line-height: 1.6;
+}
+
+/* 4. Form Groups */
+.edit-profile-card .form-group {
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-profile-card .form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--epf-text-secondary);
+  margin-bottom: 10px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 5. Inputs & Textarea */
+.edit-profile-card input[type="text"],
+.edit-profile-card textarea {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--epf-text-primary);
+  background: var(--epf-surface);
+  border: 1px solid var(--epf-border);
+  border-radius: var(--epf-radius-sm);
+  outline: none;
+  transition: var(--epf-transition);
+  box-sizing: border-box;
+  font-family: inherit;
+  box-shadow: var(--epf-inner-shadow);
+}
+
+.edit-profile-card input[type="text"]::placeholder,
+.edit-profile-card textarea::placeholder {
+  color: var(--epf-text-placeholder);
+}
+
+.edit-profile-card input[type="text"]:hover,
+.edit-profile-card textarea:hover {
+  border-color: var(--epf-border-hover);
+  background: var(--epf-surface-hover);
+}
+
+.edit-profile-card input[type="text"]:focus,
+.edit-profile-card textarea:focus {
+  border-color: var(--epf-accent-start);
+  box-shadow: var(--epf-shadow-glow);
+  background: rgba(99, 102, 241, 0.03);
+}
+
+.edit-profile-card textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* 6. Button Group */
+.edit-profile-card .button-group {
+  display: flex;
+  gap: 14px;
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--epf-border);
+}
+
+/* 7. Save Button */
+.edit-profile-card .save-btn {
+  flex: 1;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--epf-accent-start) 0%, var(--epf-accent-end) 100%);
+  border: none;
+  border-radius: var(--epf-radius-sm);
+  cursor: pointer;
+  transition: var(--epf-transition);
+  box-shadow: 
+    0 4px 14px rgba(99, 102, 241, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.01em;
+}
+
+.edit-profile-card .save-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.edit-profile-card .save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(99, 102, 241, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, var(--epf-accent-hover-start) 0%, var(--epf-accent-hover-end) 100%);
+}
+
+.edit-profile-card .save-btn:hover::after {
+  left: 100%;
+}
+
+.edit-profile-card .save-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* 8. Cancel Button */
+.edit-profile-card .cancel-btn {
+  flex: 1;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--epf-text-secondary);
+  background: var(--epf-surface);
+  border: 1px solid var(--epf-border);
+  border-radius: var(--epf-radius-sm);
+  cursor: pointer;
+  transition: var(--epf-transition);
+  box-shadow: var(--epf-inner-shadow);
+}
+
+.edit-profile-card .cancel-btn:hover {
+  background: var(--epf-surface-hover);
+  color: var(--epf-text-primary);
+  border-color: var(--epf-border-hover);
+  transform: translateY(-1px);
+}
+
+.edit-profile-card .cancel-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .edit-profile-card {
+    margin: 32px;
+    padding: 36px;
+    max-width: 100%;
+  }
+
+  .edit-profile-card h2 {
+    font-size: 24px;
+  }
+
+  .edit-profile-card .button-group {
+    flex-direction: column;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .edit-profile-card {
+    margin: 16px;
+    padding: 28px;
+    border-radius: 16px;
+  }
+
+  .edit-profile-card h2 {
+    font-size: 22px;
+  }
+
+  .edit-profile-card .subtitle {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .edit-profile-card .form-group {
+    margin-bottom: 22px;
+  }
+
+  .edit-profile-card input[type="text"],
+  .edit-profile-card textarea {
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  .edit-profile-card .button-group {
+    margin-top: 28px;
+    padding-top: 24px;
+    gap: 12px;
+  }
+
+  .edit-profile-card .save-btn,
+  .edit-profile-card .cancel-btn {
+    width: 100%;
+    padding: 14px;
+  }
+}
