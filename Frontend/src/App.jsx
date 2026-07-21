@@ -8,8 +8,7 @@ import Requests from "./pages/Requests";
 import Connections from "./pages/Connections";
 import Sessions from "./pages/Sessions";
 import AiMentor from "./pages/AiMentor";
-
-
+import LearningRoadmap from "./pages/LearningRoadmap";
 
 function App() {
   return (
@@ -23,8 +22,8 @@ function App() {
       <Route path="/connections" element={<Connections />} />
       <Route path="/sessions" element={<Sessions />} />
       <Route path="/ai-mentor" element={<AiMentor />} />
+      <Route path="/ai-roadmap" element={<LearningRoadmap />} />
     </Routes>
-    
   );
 }
 
