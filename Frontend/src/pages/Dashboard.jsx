@@ -238,6 +238,7 @@ function Dashboard() {
         <button onClick={() => navigate("/connections")}>Connections 🤝</button>
         <button onClick={() => navigate("/ai-mentor")}>AI Mentor 🤖</button>
         <button onClick={() => navigate("/ai-roadmap")}>AI Roadmap 🗺️</button>
+        <button onClick={() => navigate("/resume-review")}>AI Resume Review 📄</button>
       </nav>
     </div>
   );

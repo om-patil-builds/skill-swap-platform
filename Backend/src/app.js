@@ -36,4 +36,7 @@ app.use("/api/ai-mentor", aiMentorRoutes);
 const roadmapRoutes = require("./routes/roadmapRoutes");
 app.use("/api/roadmap", roadmapRoutes);
 
+const resumeReviewRoutes = require("./routes/resumeReviewRoutes");
+app.use("/api/resume-review", resumeReviewRoutes);
+
 module.exports = app;
