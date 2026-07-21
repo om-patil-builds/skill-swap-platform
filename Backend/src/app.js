@@ -29,4 +29,8 @@ app.use("/api/chat", chatRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/sessions", sessionRoutes);
+
+const aiMentorRoutes = require("./routes/aiMentorRoutes");
+app.use("/api/ai-mentor", aiMentorRoutes);
+
 module.exports = app;
