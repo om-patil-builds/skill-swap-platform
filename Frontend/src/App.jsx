@@ -7,7 +7,7 @@ import Profile from "./pages/Profile";
 import Requests from "./pages/Requests";
 import Connections from "./pages/Connections";
 import Sessions from "./pages/Sessions";
-
+import AiMentor from "./pages/AiMentor";
 
 
 
@@ -21,9 +21,8 @@ function App() {
       <Route path="/profile" element={<Profile />} /> 
       <Route path="/requests" element={<Requests />} />
       <Route path="/connections" element={<Connections />} />
-
       <Route path="/sessions" element={<Sessions />} />
-
+      <Route path="/ai-mentor" element={<AiMentor />} />
     </Routes>
     
   );
