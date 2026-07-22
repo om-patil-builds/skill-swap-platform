@@ -9,6 +9,7 @@ import Connections from "./pages/Connections";
 import Sessions from "./pages/Sessions";
 import AiMentor from "./pages/AiMentor";
 import LearningRoadmap from "./pages/LearningRoadmap";
+import ResumeReview from "./pages/ResumeReview";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route path="/sessions" element={<Sessions />} />
       <Route path="/ai-mentor" element={<AiMentor />} />
       <Route path="/ai-roadmap" element={<LearningRoadmap />} />
+      <Route path="/resume-review" element={<ResumeReview />} />
     </Routes>
   );
 }
