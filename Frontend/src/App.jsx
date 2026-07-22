@@ -18,6 +18,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} /> 
       <Route path="/chat/:userId" element={<Chat />} />
+      <Route path="/chat" element={<Connections />} />
       <Route path="/profile" element={<Profile />} /> 
       <Route path="/requests" element={<Requests />} />
       <Route path="/connections" element={<Connections />} />
