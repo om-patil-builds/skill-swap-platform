@@ -654,7 +654,7 @@ function Dashboard() {
               {/* Feature 3: Resume Analyzer */}
               <div
                 className="sd-ai-feature-card"
-                onClick={() => navigate("/ai-mentor")}
+                onClick={() => navigate("/resume-review")}
               >
                 <div className="sd-ai-card-top">
                   <div className="sd-ai-icon-box">📋</div>
@@ -762,54 +762,6 @@ function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Chats Section */}
-      {/* <h2 className="chat-title">Your Chats</h2>
-
-      {chats.length === 0 ? (
-        <p className="no-chat">No chats yet</p>
-      ) : (
-        chats.map((chat) => (
-          <div
-            key={chat._id}
-            className="chat-card"
-            onClick={() => navigate(`/chat/${chat.otherUserId}`)}
-          >
-            <p>
-              <b>User:</b> {chat.otherUserId}
-            </p>
-            <p>{chat.lastMessage}</p>
-          </div>
-        ))
-      )} */}
-
-      {/* Matches Section */}
-      <h2 className="chat-title">Suggested Users 🔥</h2>
-
-      {matches.length === 0 ? (
-        <p className="no-chat">No matches found</p>
-      ) : (
-        <div className="matches-grid">
-          {matches.map((user) => (
-            <MatchCard
-              key={user._id}
-              user={user}
-              status={statusMap[user._id] || "none"}
-              onConnect={handleConnect}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Navigation Buttons */}
-      <nav className="dashboard-nav">
-        <button onClick={() => navigate("/profile")}>Go to Profile</button>
-        <button onClick={() => navigate("/requests")}>Requests 🔔</button>
-        <button onClick={() => navigate("/connections")}>Connections 🤝</button>
-        <button onClick={() => navigate("/ai-mentor")}>AI Mentor 🤖</button>
-        <button onClick={() => navigate("/ai-roadmap")}>AI Roadmap 🗺️</button>
-        <button onClick={() => navigate("/resume-review")}>AI Resume Review 📄</button>
-      </nav>
     </div>
   );
 }
