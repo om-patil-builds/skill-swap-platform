@@ -1,6 +1,6 @@
 /* ==========================================================================
    SkillSwap AI SaaS Dashboard CSS - Production Theme
-   Theme: Linear & Vercel Inspired | Dark Theme (#09090B) + Orange Accent (#F97316)
+   Theme: SkillSwap SaaS | Dark Theme (#0B0B0F) + Orange Accent (#FF7A18)
    ========================================================================== */
 
 /* ── LAYOUT CONTAINER ────────────────────────────────────────────────── */
@@ -225,8 +225,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #27272A 0%, #3F3F46 100%);
-  border: 1px solid var(--border-hover);
+  background: linear-gradient(135deg, #FF7A18 0%, #E8690D 100%);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,9 +536,9 @@
 
 /* SECTION 1: WELCOME HERO */
 .sd-hero-card {
-  background: linear-gradient(135deg, #111111 0%, #18181B 100%);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, #111113 0%, #1A1A1E 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 2.5rem;
   display: flex;
   align-items: center;
@@ -555,7 +555,7 @@
   right: -10%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, var(--accent-orange-glow) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 122, 24, 0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -772,8 +772,8 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #27272A 0%, #3F3F46 100%);
-  border: 1.5px solid var(--border-hover);
+  background: linear-gradient(135deg, #2A2A2E 0%, #3A3A3E 100%);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;

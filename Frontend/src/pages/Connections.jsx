@@ -22,6 +22,17 @@ function Connections() {
 
   return (
     <div className="connections-page">
+      {/* ── Top Nav ── */}
+      <nav className="connections-topnav" aria-label="Connections navigation">
+        <div className="connections-topnav-brand" onClick={() => navigate("/dashboard")}>
+          <div className="tnav-icon">⚡</div>
+          <span>Skill<span className="tnav-accent">Swap</span></span>
+        </div>
+        <button className="connections-back-btn" onClick={() => navigate("/dashboard")}>
+          ← Dashboard
+        </button>
+      </nav>
+
       <div className="connections-shell">
         <div className="connections-header">
           <div>

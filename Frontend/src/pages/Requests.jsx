@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import "./Requests.css";
 
 function Requests() {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +42,17 @@ function Requests() {
 
   return (
     <div className="requests-page">
+      {/* ── Top Nav ── */}
+      <nav className="requests-topnav" aria-label="Requests navigation">
+        <div className="requests-topnav-brand" onClick={() => navigate("/dashboard")}>
+          <div className="tnav-icon">⚡</div>
+          <span>Skill<span className="tnav-accent">Swap</span></span>
+        </div>
+        <button className="requests-back-btn" onClick={() => navigate("/dashboard")}>
+          ← Dashboard
+        </button>
+      </nav>
+
       <div className="requests-shell">
         <div className="requests-header">
           <div>
