@@ -1,35 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #07111f;
-  --bg-soft: #0f172a;
-  --surface: #ffffff;
-  --surface-muted: #f8faff;
-  --surface-strong: #eef2ff;
-  --border: rgba(15, 23, 42, 0.08);
-  --border-strong: rgba(79, 70, 229, 0.18);
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --primary-strong: #4338ca;
-  --primary-soft: #eef2ff;
-  --secondary: #14b8a6;
-  --accent: #f59e0b;
-  --danger: #ef4444;
-  --red-light: #fef2f2;
-  --text: #f8fafc;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-dark: #0f172a;
-  --text-inverse: #ffffff;
-  --text-muted: #94a3b8;
-  --radius: 16px;
-  --primary-hover: #3730a3;
-  --radius-sm: 12px;
-  --radius-lg: 22px;
-  --radius-full: 9999px;
-  --transition: 0.2s ease;
-  --shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
-  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+  /* Master SaaS Design System Tokens (Linear & Vercel Inspired) */
+  --bg-dark: #09090B;
+  --surface-dark: #111111;
+  --surface-card: #141417;
+  --surface-hover: #18181B;
+  --border-color: #27272A;
+  --border-hover: #3F3F46;
+  
+  --accent-orange: #F97316;
+  --accent-orange-hover: #EA580C;
+  --accent-orange-subtle: rgba(249, 115, 22, 0.12);
+  --accent-orange-glow: rgba(249, 115, 22, 0.25);
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-dim: #52525B;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.15);
 }
 
 * {
@@ -40,20 +39,18 @@
 
 html {
   font-size: 16px;
-  background: var(--bg);
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
   width: 100%;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(79, 70, 229, 0.18), transparent 24%),
-    linear-gradient(135deg, #07111f 0%, #111827 45%, #0f172a 100%);
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -62,20 +59,41 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
+  background-color: var(--bg-dark);
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272A;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3F3F46;
+}
+
+/* Global Utility Inputs & Buttons */
+button, input, textarea, select {
+  font-family: inherit;
 }
 
 button {
   cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
 }
 
-img {
-  display: block;
-  max-width: 100%;
+a {
+  color: inherit;
+  text-decoration: none;
 }
