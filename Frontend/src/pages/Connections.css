@@ -1,167 +1,239 @@
+/* ============================================================
+   SkillSwap — Connections Page
+   ============================================================ */
+
 .connections-page {
   min-height: 100vh;
-  padding: 32px 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f8fafc 100%);
-  color: #0f172a;
+  background-color: #0B0B0F;
+  color: #FFFFFF;
 }
 
+/* ── Top nav ─────────────────────────────────────────────── */
+.connections-topnav {
+  width: 100%;
+  background-color: #161616;
+  border-bottom: 1px solid #2A2A2A;
+  padding: 0 1.5rem;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.connections-topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.connections-topnav-brand .tnav-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #FF7A18, #E8690D);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.connections-topnav-brand .tnav-accent { color: #FF7A18; }
+
+.connections-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background-color: transparent;
+  border: 1px solid #2A2A2A;
+  border-radius: 10px;
+  color: #A3A3A3;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.connections-back-btn:hover { border-color: #3D3D3D; color: #FFFFFF; }
+
+/* ── Shell ───────────────────────────────────────────────── */
 .connections-shell {
-  max-width: 1040px;
+  max-width: 860px;
   margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
+/* ── Header ──────────────────────────────────────────────── */
 .connections-header {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 28px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-}
-
-.page-eyebrow {
-  margin: 0 0 8px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #4f46e5;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .connections-header h2 {
-  margin: 0;
-  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+  margin: 0;
 }
 
-.page-subtitle {
-  margin: 8px 0 0;
-  color: #64748b;
-  font-size: 0.96rem;
-  line-height: 1.6;
+.connections-header .page-subtitle {
+  font-size: 0.9rem;
+  color: #A3A3A3;
+  margin: 0.3rem 0 0;
+  line-height: 1.55;
 }
 
 .connections-pill {
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: #ecfdf5;
-  color: #047857;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.85rem;
+  background-color: #1C1C1F;
+  color: #A3A3A3;
+  border: 1px solid #2A2A2A;
+  border-radius: 99px;
+  font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 0.4rem;
 }
 
+/* ── Loading / Empty ─────────────────────────────────────── */
 .connections-state {
-  padding: 26px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  padding: 3rem;
   text-align: center;
-  color: #64748b;
-  font-weight: 600;
+  color: #6B6B6B;
+  font-size: 0.9rem;
+  background-color: #161616;
+  border: 1px solid #2A2A2A;
+  border-radius: 16px;
 }
 
+.connections-state.empty { color: #A3A3A3; }
+
+/* ── List & Cards ────────────────────────────────────────── */
 .connections-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 1rem;
 }
 
 .connection-card {
+  background-color: #161616;
+  border: 1px solid #2A2A2A;
+  border-radius: 16px;
+  padding: 1.5rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 20px 22px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.connection-card:hover {
+  border-color: #3D3D3D;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 .info {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 1rem;
+  flex: 1;
   min-width: 0;
 }
 
-.avatar-badge {
-  width: 46px;
-  height: 46px;
+/* Reuse avatar-badge from Requests */
+.connection-card .avatar-badge {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
+  background: linear-gradient(135deg, #FF7A18 0%, #E8690D 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #14b8a6, #0f766e);
-  color: white;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
   flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(255, 122, 24, 0.25);
+}
+
+.info > div:not(.avatar-badge) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: hidden;
 }
 
 .info h3 {
-  margin: 0 0 4px;
   font-size: 1rem;
-  color: #111827;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .info p {
-  margin: 2px 0;
-  color: #64748b;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
+  color: #A3A3A3;
+  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
+.info p b { color: #FFFFFF; font-weight: 600; }
+
+/* ── Chat Button ─────────────────────────────────────────── */
 .chat-btn {
-  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.35rem;
+  background-color: #FF7A18;
+  color: #fff;
   border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
-  color: white;
+  border-radius: 12px;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.18);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .chat-btn:hover {
+  background-color: #E8690D;
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 122, 24, 0.3);
 }
 
-@media (max-width: 768px) {
-  .connections-page {
-    padding: 20px 14px 32px;
-  }
+.chat-btn:active { transform: translateY(0); box-shadow: none; }
 
-  .connections-header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px 18px;
-    border-radius: 20px;
-  }
-
-  .connection-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .chat-btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .avatar-badge {
-    width: 40px;
-    height: 40px;
-  }
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .connections-shell   { padding: 1.5rem 1rem 2.5rem; }
+  .connection-card     { flex-direction: column; align-items: flex-start; padding: 1.25rem; }
+  .chat-btn            { width: 100%; }
+  .connections-topnav  { padding: 0 1rem; }
 }

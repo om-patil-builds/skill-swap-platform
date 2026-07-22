@@ -9,80 +9,79 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    try {
+      const res = await API.post("/auth/login", { email, password });
 
-  try {
+      console.log("LOGIN:", res.data);
 
-    const res = await API.post(
-      "/auth/login",
-      {
-        email,
-        password,
-      }
-    );
+      // 🔥 support both structures
+      const user = res.data.user || res.data;
 
-    console.log("LOGIN:", res.data);
+      // 🔥 SAVE
+      localStorage.setItem("userId", user._id || user.id);
+      localStorage.setItem("userName", user.username);
 
-    // 🔥 support both structures
-    const user =
-      res.data.user || res.data;
+      console.log("SAVED USER ID:", localStorage.getItem("userId"));
 
-    // 🔥 SAVE
-    localStorage.setItem(
-      "userId",
-       user._id || user.id
-    );
-
-    localStorage.setItem(
-      "userName",
-      user.username
-    );
-
-    console.log(
-      "SAVED USER ID:",
-      localStorage.getItem(
-        "userId"
-      )
-    );
-
-    alert("Login successful");
-
-    navigate("/dashboard");
-
-  } catch (err) {
-
-    console.log(err);
-
-    alert("Login failed");
-  }
-};
+      alert("Login successful");
+      navigate("/dashboard");
+    } catch (err) {
+      console.log(err);
+      alert("Login failed");
+    }
+  };
 
   return (
-    <main>
-      <div className="login-container">
-        <div className="login-box">
-          <h2>SkillSwap Login 🚀</h2>
+    <main className="auth-page">
+      {/* Brand */}
+      <div className="auth-brand" onClick={() => navigate("/")}>
+        <div className="auth-brand-icon">⚡</div>
+        <span className="auth-brand-text">Skill<span>Swap</span></span>
+      </div>
 
+      {/* Card */}
+      <div className="auth-card">
+        <h1 className="auth-card-title">Welcome back</h1>
+        <p className="auth-card-subtitle">Sign in to continue to SkillSwap</p>
+
+        <div className="auth-form-group">
+          <label className="auth-label" htmlFor="login-email">Email address</label>
           <input
+            id="login-email"
             type="email"
-            placeholder="Enter Email"
+            className="auth-input"
+            placeholder="you@example.com"
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
           />
-
-          <input
-            type="password"
-            placeholder="Enter Password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button onClick={handleLogin}>Login</button>
-
-          <p
-            onClick={() => navigate("/register")}
-            style={{ cursor: "pointer", color: "red" }}
-          >
-            Don't have an account? Register
-          </p>
         </div>
+
+        <div className="auth-form-group">
+          <label className="auth-label" htmlFor="login-password">Password</label>
+          <input
+            id="login-password"
+            type="password"
+            className="auth-input"
+            placeholder="Enter your password"
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+          />
+        </div>
+
+        <button id="login-submit" className="auth-btn" onClick={handleLogin}>
+          Sign In
+        </button>
+
+        <p className="auth-footer">
+          Don&apos;t have an account?{" "}
+          <button
+            className="auth-footer-link"
+            onClick={() => navigate("/register")}
+          >
+            Create account
+          </button>
+        </p>
       </div>
     </main>
   );
