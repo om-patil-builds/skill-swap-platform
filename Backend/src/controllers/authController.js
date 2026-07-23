@@ -12,14 +12,14 @@ async function registerUser(req, res) {
     }
 
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
+      $or: [{ email: email.toLowerCase() }, { username }]
     });
 
     if (existingUser) {
       return res.status(409).json({
         message:
-          existingUser.email === email
-            ? "Email already exists"
+          existingUser.email === email.toLowerCase()
+            ? "This email is already registered."
             : "Username already exists"
       });
     }
@@ -28,7 +28,7 @@ async function registerUser(req, res) {
 
     const user = await User.create({
       username,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       bio,
       profileImage
@@ -74,9 +74,11 @@ async function loginUser(req, res) {
       return res.status(400).json({ message: "Password is required" });
     }
 
-    const user = await User.findOne({
-      $or: [{ email }, { username }]
-    });
+    const query = {};
+    if (email) query.email = email.toLowerCase();
+    if (username) query.username = username;
+
+    const user = await User.findOne(query);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
