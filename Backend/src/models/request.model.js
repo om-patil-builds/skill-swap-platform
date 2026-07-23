@@ -16,12 +16,9 @@ const requestSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "accepted", "rejected"],
       default: "pending",
-    }
+    },
   },
   { timestamps: true }
 );
-
-// 🔥 prevent duplicate request
-requestSchema.index({ sender: 1, receiver: 1 }, { unique: true });
 
 module.exports = mongoose.model("Request", requestSchema);

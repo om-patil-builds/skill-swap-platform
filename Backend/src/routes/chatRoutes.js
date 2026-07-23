@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
+const { checkAccess } = require("../controllers/requestController");
 
 const {
   saveMessage,
@@ -11,18 +12,19 @@ const {
   deleteMessageForEveryone,
 } = require("../controllers/chatController");
 
-// 🔥 Send message
-router.post("/send", authMiddleware, saveMessage);
+const chatAccess = (req, res, next) => {
+  req.params.otherUserId = req.params.userId;
+  return checkAccess(req, res, next);
+};
 
-// 🔥 Get chat list (dashboard)
+router.post("/send", authMiddleware, chatAccess, saveMessage);
+
 router.get("/list", authMiddleware, getChatList);
 
-// 🔥 Get chat history with specific user
-// ⚠️ Always keep this LAST (important)
-router.get("/:userId", authMiddleware, getChatHistory);
+router.get("/:userId", authMiddleware, chatAccess, getChatHistory);
 
 router.delete("/message/:messageId/me", authMiddleware, deleteMessageForMe);
 
-router.delete("/message/:messageId/everyone",authMiddleware,deleteMessageForEveryone,);
+router.delete("/message/:messageId/everyone", authMiddleware, deleteMessageForEveryone);
 
 module.exports = router;

@@ -40,9 +40,13 @@ async function registerUser(req, res) {
       { expiresIn: "7d" }
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -100,10 +104,13 @@ async function loginUser(req, res) {
       { expiresIn: "7d" }
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax"
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -124,7 +131,14 @@ async function loginUser(req, res) {
 }
 
 const logoutUser = (req, res) => {
-  res.clearCookie("token");
+  const isProduction = process.env.NODE_ENV === "production";
+
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+  });
+
   res.status(200).json({
     success: true,
     message: "Logged out successfully",
