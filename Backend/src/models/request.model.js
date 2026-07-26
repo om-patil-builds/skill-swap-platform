@@ -21,4 +21,6 @@ const requestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+requestSchema.index({ sender: 1, receiver: 1 }, { unique: true });
+
 module.exports = mongoose.model("Request", requestSchema);

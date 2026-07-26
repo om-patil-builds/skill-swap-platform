@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import socket from "../socket";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -72,7 +73,9 @@ function Dashboard() {
   const fetchNotifications = async () => {
     try {
       const res = await API.get("/notifications");
-      setNotifications(res.data || []);
+      const items = Array.isArray(res.data) ? res.data : [];
+      const sorted = items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setNotifications(sorted);
     } catch (err) {
       console.error("Notifications error:", err);
     }
@@ -170,6 +173,27 @@ function Dashboard() {
     }
   };
 
+  const getRelativeTime = (timestamp) => {
+    if (!timestamp) return "Just now";
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return "Just now";
+
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffSec < 10) return "Just now";
+    if (diffSec < 60) return `${diffSec} sec ago`;
+    if (diffMin < 60) return `${diffMin} min ago`;
+    if (diffHr < 24) return `${diffHr} hr ago`;
+    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
   const filteredMatches = matches.filter((u) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
@@ -206,6 +230,53 @@ function Dashboard() {
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    const currentUserId = localStorage.getItem("userId");
+    if (currentUserId) {
+      socket.emit("join", currentUserId);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleConnect = () => {
+      const currentUserId = localStorage.getItem("userId");
+      if (currentUserId) {
+        socket.emit("join", currentUserId);
+      }
+    };
+
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleNewNotification = (notification) => {
+      if (!notification || !notification._id) return;
+      setNotifications((prev) => {
+        const exists = prev.some((n) => n._id === notification._id);
+        if (exists) return prev;
+        return [notification, ...prev];
+      });
+      setPendingRequestsCount((prev) => prev + 1);
+    };
+
+    const handleRequestUpdated = () => {
+      fetchPendingRequestsCount();
+      fetchConnectionsCount();
+    };
+
+    socket.on("newNotification", handleNewNotification);
+    socket.on("requestUpdated", handleRequestUpdated);
+
+    return () => {
+      socket.off("newNotification", handleNewNotification);
+      socket.off("requestUpdated", handleRequestUpdated);
+    };
+  }, [fetchPendingRequestsCount, fetchConnectionsCount]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -696,42 +767,22 @@ function Dashboard() {
 
               <div className="sd-activity-list">
                 {notifications.length > 0 ? (
-                  notifications.slice(0, 3).map((n, idx) => (
-                    <div key={n._id || idx} className="sd-activity-item">
+                  notifications.slice(0, 3).map((n) => (
+                    <div key={n._id} className="sd-activity-item">
                       <div className="sd-activity-avatar">
                         {(n.text || "N").substring(0, 1).toUpperCase()}
                       </div>
                       <div className="sd-activity-info">
                         <span className="sd-activity-text">{n.text}</span>
-                        <span className="sd-activity-time">Just now</span>
+                        <span className="sd-activity-time">{getRelativeTime(n.createdAt)}</span>
                       </div>
                       <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
                     </div>
                   ))
                 ) : (
-                  <>
-                    <div className="sd-activity-item">
-                      <div className="sd-activity-avatar" style={{ color: "#F97316" }}>S</div>
-                      <div className="sd-activity-info">
-                        <span className="sd-activity-text">
-                          <strong>Sarah</strong> accepted your connection request
-                        </span>
-                        <span className="sd-activity-time">2h ago</span>
-                      </div>
-                      <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
-                    </div>
-
-                    <div className="sd-activity-item">
-                      <div className="sd-activity-avatar" style={{ color: "#F97316" }}>A</div>
-                      <div className="sd-activity-info">
-                        <span className="sd-activity-text">
-                          <strong>Alex</strong> sent you a connection request
-                        </span>
-                        <span className="sd-activity-time">5h ago</span>
-                      </div>
-                      <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
-                    </div>
-                  </>
+                  <div className="sd-empty-state" style={{ padding: "1.5rem" }}>
+                    <p className="sd-empty-desc" style={{ margin: 0 }}>No recent activity yet. Start by sending a connection request!</p>
+                  </div>
                 )}
               </div>
             </section>

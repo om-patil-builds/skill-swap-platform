@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import socket from "../socket";
 import "./Connections.css";
 
 function Connections() {
@@ -17,8 +18,25 @@ function Connections() {
   };
 
   useEffect(() => {
+    const currentUserId = localStorage.getItem("userId");
+    if (currentUserId) {
+      socket.emit("join", currentUserId);
+    }
+
     fetchConnections();
   }, []);
+
+  useEffect(() => {
+    const handleRequestUpdated = () => {
+      fetchConnections();
+    };
+
+    socket.on("requestUpdated", handleRequestUpdated);
+
+    return () => {
+      socket.off("requestUpdated", handleRequestUpdated);
+    };
+  }, [fetchConnections]);
 
   return (
     <div className="connections-page">
@@ -39,7 +57,7 @@ function Connections() {
             <p className="page-eyebrow">Your network</p>
             <h2>Your Connections</h2>
             <p className="page-subtitle">
-              Continue conversations with the people you’ve already connected with.
+              Continue conversations with the people you've already connected with.
             </p>
           </div>
           <div className="connections-pill">{users.length} connected</div>

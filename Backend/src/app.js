@@ -9,9 +9,21 @@ const isProduction = process.env.NODE_ENV === "production";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(helmet());
+
+// In development, allow any localhost Vite port (Vite auto-increments when port is busy)
+const corsOrigin = isProduction
+  ? FRONTEND_URL
+  : (origin, callback) => {
+      if (!origin || /^http:\/\/localhost:(5173|5174|5175)$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    };
+
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: corsOrigin,
     credentials: true,
   })
 );

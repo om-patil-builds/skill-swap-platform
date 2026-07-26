@@ -60,10 +60,49 @@ function Chat() {
   }, [userId]);
 
   useEffect(() => {
+    const handleConnect = () => {
+      socket.emit("join", currentUserId);
+    };
+
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, [currentUserId]);
+
+  useEffect(() => {
+    const handleConnect = () => {
+      socket.emit("join", currentUserId);
+    };
+
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, [currentUserId]);
+
+  useEffect(() => {
     socket.on("receiveMessage", (data) => {
       setMessages((prev) => {
         const exists = prev.some((msg) => msg._id === data._id);
         if (exists) return prev;
+
+        const tempIndex = prev.findIndex(
+          (msg) =>
+            msg._id.startsWith("temp-") &&
+            String(msg.sender?._id || msg.sender) === String(data.sender?._id || data.sender) &&
+            String(msg.receiver) === String(data.receiver) &&
+            String(msg.message) === String(data.message)
+        );
+
+        if (tempIndex !== -1) {
+          const updated = [...prev];
+          updated[tempIndex] = data;
+          return updated;
+        }
+
         return [...prev, data];
       });
     });
@@ -116,15 +155,11 @@ function Chat() {
     setText("");
     setSending(true);
 
-    socket.emit("sendMessage", tempMsg);
-
     try {
-      await API.post("/chat/send", {
-        receiver: userId,
-        message: messageText,
-      });
+      socket.emit("sendMessage", tempMsg);
     } catch (err) {
       console.error("Send Error:", err);
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempId));
     } finally {
       setSending(false);
     }

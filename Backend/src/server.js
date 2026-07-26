@@ -16,16 +16,31 @@ const app = require("./app");
 const { initializeSocket } = require("./socket");
 const http = require("http");
 
-const server = http.createServer(app);
+function startServer(port) {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer(app);
+    initializeSocket(server, FRONTEND_URL);
 
-initializeSocket(server, FRONTEND_URL);
+    server.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+      console.log(`Frontend URL: ${FRONTEND_URL}`);
+      resolve(server);
+    });
 
-connectToDb().then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Frontend URL: ${FRONTEND_URL}`);
+    server.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        console.warn(`Port ${port} in use, trying ${port + 1}...`);
+        startServer(port + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
   });
-}).catch((err) => {
-  console.error("Failed to connect to database:", err);
-  process.exit(1);
-});
+}
+
+connectToDb()
+  .then(() => startServer(PORT))
+  .catch((err) => {
+    console.error("Failed to connect to database:", err);
+    process.exit(1);
+  });

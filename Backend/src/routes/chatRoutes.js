@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
-const { checkAccess } = require("../controllers/requestController");
+const Request = require("../models/request.model");
 
 const {
   saveMessage,
@@ -12,10 +12,32 @@ const {
   deleteMessageForEveryone,
 } = require("../controllers/chatController");
 
-const chatAccess = (req, res, next) => {
-  req.params.otherUserId = req.params.userId;
-  return checkAccess(req, res, next);
-};
+async function chatAccess(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const otherUserId = req.params.userId || req.params.otherUserId;
+
+    if (!otherUserId) {
+      return res.status(400).json({ message: "Missing user ID" });
+    }
+
+    const request = await Request.findOne({
+      $or: [
+        { sender: userId, receiver: otherUserId, status: "accepted" },
+        { sender: otherUserId, receiver: userId, status: "accepted" },
+      ],
+    });
+
+    if (!request) {
+      return res.status(403).json({ message: "Not allowed to access chat" });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Chat access error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
 
 router.post("/send", authMiddleware, chatAccess, saveMessage);
 

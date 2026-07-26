@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import socket from "../socket";
 import "./Requests.css";
 
 function Requests() {
@@ -20,6 +21,11 @@ function Requests() {
   };
 
   useEffect(() => {
+    const currentUserId = localStorage.getItem("userId");
+    if (currentUserId) {
+      socket.emit("join", currentUserId);
+    }
+
     const markNotificationsRead = async () => {
       try {
         await API.put("/notifications/read-all");
@@ -31,10 +37,23 @@ function Requests() {
     fetchRequests();
   }, []);
 
+  useEffect(() => {
+    const handleRequestUpdated = () => {
+      fetchRequests();
+    };
+
+    socket.on("requestUpdated", handleRequestUpdated);
+
+    return () => {
+      socket.off("requestUpdated", handleRequestUpdated);
+    };
+  }, [fetchRequests]);
+
   const handleAction = async (id, status) => {
     try {
       await API.put(`/requests/${id}`, { status });
       setRequests((prev) => prev.filter((r) => r._id !== id));
+      fetchRequests();
     } catch (err) {
       console.log(err);
     }

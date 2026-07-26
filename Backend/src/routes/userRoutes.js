@@ -8,7 +8,7 @@ const {
   updateProfile,
   getMatches,
   getMutualMatches,
-  getUserById // 🔥 add this
+  getUserById
 } = require("../controllers/userController");
 
 const User = require("../models/user.model");
@@ -38,7 +38,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 
 
 // 🔐 UPDATE PROFILE
-router.put("/profile", authMiddleware, updateProfile);
+router.put("/profile", authMiddleware, upload.single("profileImage"), updateProfile);
 
 
 // 🔥 MATCH ROUTES
@@ -49,8 +49,6 @@ router.get("/mutual-matches", authMiddleware, getMutualMatches);
 // 🔥 GET USER BY ID (VERY IMPORTANT FOR CHAT)
 // ⚠️ ALWAYS KEEP THIS LAST
 router.get("/:id", authMiddleware, getUserById);
-
-router.put("/profile", authMiddleware, upload.single("profileImage"), updateProfile);
 
 
 module.exports = router;

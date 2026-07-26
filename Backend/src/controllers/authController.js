@@ -62,6 +62,11 @@ async function registerUser(req, res) {
 
   } catch (error) {
     console.error("Register error:", error);
+    // MongoDB duplicate key error (e.g. race condition on email/username)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || "field";
+      return res.status(409).json({ message: `${field} already exists.` });
+    }
     res.status(500).json({ message: "Server error" });
   }
 }
