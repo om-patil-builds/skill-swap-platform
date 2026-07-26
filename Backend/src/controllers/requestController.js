@@ -1,10 +1,10 @@
 const Request = require("../models/request.model");
 const Notification = require("../models/notification.model");
 const User = require("../models/user.model");
+const { emitToUser } = require("../services/socketService");
 
 async function sendRequest(req, res) {
   try {
-    // 🔐 Check auth
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Unauthorized user" });
     }
@@ -12,19 +12,16 @@ async function sendRequest(req, res) {
     const senderId = req.user.id;
     const { receiverId } = req.body;
 
-    // 🛑 Validate receiverId
     if (!receiverId) {
       return res.status(400).json({ message: "receiverId is required" });
     }
 
-    // 🛑 Prevent self request
     if (String(senderId) === String(receiverId)) {
       return res.status(400).json({
         message: "You cannot send request to yourself",
       });
     }
 
-    // 🔍 Check duplicate or reverse request
     const existing = await Request.findOne({
       $or: [
         { sender: senderId, receiver: receiverId },
@@ -38,21 +35,21 @@ async function sendRequest(req, res) {
       });
     }
 
-    // ✅ Create new request
     const request = await Request.create({
       sender: senderId,
       receiver: receiverId,
-      status: "pending", // 🔥 explicitly set
+      status: "pending",
     });
 
-    // 🔔 Fetch sender's username to include in the notification
     const senderUser = await User.findById(senderId).select("username");
     const senderName = senderUser ? senderUser.username : "Someone";
 
-    await Notification.create({
+    const notification = await Notification.create({
       user: receiverId,
       text: `${senderName} sent you a skill request 🤝`,
     });
+
+    emitToUser(receiverId, "newNotification", notification);
 
     return res.status(201).json({
       message: "Request sent successfully",
@@ -64,7 +61,6 @@ async function sendRequest(req, res) {
   }
 }
 
-// 🔥 Update Request Status (Accept / Reject)
 async function updateRequest(req, res) {
   try {
     const { requestId } = req.params;
@@ -82,7 +78,6 @@ async function updateRequest(req, res) {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    // 🔥 ONLY receiver can accept/reject
     if (String(request.receiver) !== String(userId)) {
       return res.status(403).json({ message: "Not allowed" });
     }
@@ -90,26 +85,27 @@ async function updateRequest(req, res) {
     request.status = status;
     await request.save();
 
-    // 🔔 Fetch User B's (acting user's) username for the notification text
     const actingUser = await User.findById(userId).select("username");
     const actingUsername = actingUser ? actingUser.username : "Someone";
 
-    // 🔔 Mark ALL of User B's unread notifications as read — they have acted
     await Notification.updateMany(
       { user: request.receiver, read: false },
       { read: true }
     );
 
-    // 🔔 Create a NEW notification for User A (the original sender)
     const notificationText =
       status === "accepted"
         ? `${actingUsername} accepted your skill request ✅`
         : `${actingUsername} rejected your skill request ❌`;
 
-    await Notification.create({
-      user: request.sender, // 🔔 Notify User A
+    const notification = await Notification.create({
+      user: request.sender,
       text: notificationText,
     });
+
+    emitToUser(request.sender, "newNotification", notification);
+    emitToUser(request.sender, "requestUpdated", { requestId: request._id, status });
+    emitToUser(request.receiver, "requestUpdated", { requestId: request._id, status });
 
     res.json({
       message: `Request ${status}`,
@@ -121,14 +117,13 @@ async function updateRequest(req, res) {
   }
 }
 
-// 🔥 Get received requests
 async function getMyRequests(req, res) {
   try {
     const userId = req.user.id;
 
     const requests = await Request.find({
       receiver: userId,
-      status: "pending", // 🔥 only pending
+      status: "pending",
     })
       .populate("sender", "username email skillsHave")
       .sort({ createdAt: -1 });
@@ -143,7 +138,6 @@ async function getMyRequests(req, res) {
   }
 }
 
-// 🔥 Check chat access (VERY IMPORTANT)
 async function checkAccess(req, res) {
   try {
     const userId = req.user.id;
@@ -165,7 +159,6 @@ async function checkAccess(req, res) {
   }
 }
 
-// 🔥 Get connection status
 async function getConnectionStatus(req, res) {
   try {
     const userId = req.user.id;
@@ -188,9 +181,9 @@ async function getConnectionStatus(req, res) {
 
     if (request.status === "pending") {
       if (String(request.sender) === String(userId)) {
-        return res.json({ status: "sent" }); // you sent
+        return res.json({ status: "sent" });
       } else {
-        return res.json({ status: "received" }); // you received
+        return res.json({ status: "received" });
       }
     }
 
@@ -200,7 +193,6 @@ async function getConnectionStatus(req, res) {
   }
 }
 
-// 🔥 Get accepted connections
 async function getAcceptedConnections(req, res) {
   try {
     const userId = req.user.id;
@@ -212,7 +204,6 @@ async function getAcceptedConnections(req, res) {
       ],
     }).populate("sender receiver", "username email skillsHave");
 
-    // 🔥 get other user (not current user)
     const users = connections.map((conn) => {
       if (String(conn.sender._id) === String(userId)) {
         return conn.receiver;

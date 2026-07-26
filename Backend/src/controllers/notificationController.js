@@ -10,7 +10,7 @@ const getNotifications = async (req, res) => {
 
     res.json(notifications);
   } catch (err) {
-    console.log(err);
+    console.error("Get notifications error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -18,13 +18,19 @@ const getNotifications = async (req, res) => {
 // MARK ONE NOTIFICATION AS READ
 const markAsRead = async (req, res) => {
   try {
-    await Notification.findByIdAndUpdate(req.params.id, {
-      read: true,
-    });
+    const result = await Notification.findOneAndUpdate(
+      { _id: req.params.id, user: req.user.id },
+      { read: true },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
 
     res.json({ message: "Notification read" });
   } catch (err) {
-    console.log(err);
+    console.error("Mark as read error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -39,7 +45,7 @@ const markAllAsRead = async (req, res) => {
 
     res.json({ message: "All notifications marked as read" });
   } catch (err) {
-    console.log(err);
+    console.error("Mark all as read error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

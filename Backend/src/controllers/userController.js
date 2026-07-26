@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 
 
 async function updateProfile(req, res) {
@@ -136,16 +137,19 @@ async function getMutualMatches(req, res) {
 
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("username");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(req.params.id).select("username profileImage bio skillsHave skillsWant");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     res.json(user);
-
   } catch (err) {
-    console.log(err);
+    console.error("Get user by id error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

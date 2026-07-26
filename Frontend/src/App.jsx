@@ -10,22 +10,93 @@ import Sessions from "./pages/Sessions";
 import AiMentor from "./pages/AiMentor";
 import LearningRoadmap from "./pages/LearningRoadmap";
 import ResumeReview from "./pages/ResumeReview";
+import AuthGuard from "./components/AuthGuard";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} /> 
-      <Route path="/chat/:userId" element={<Chat />} />
-      <Route path="/chat" element={<Connections />} />
-      <Route path="/profile" element={<Profile />} /> 
-      <Route path="/requests" element={<Requests />} />
-      <Route path="/connections" element={<Connections />} />
-      <Route path="/sessions" element={<Sessions />} />
-      <Route path="/ai-mentor" element={<AiMentor />} />
-      <Route path="/ai-roadmap" element={<LearningRoadmap />} />
-      <Route path="/resume-review" element={<ResumeReview />} />
+      <Route
+        path="/dashboard"
+        element={
+          <AuthGuard>
+            <Dashboard />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/chat/:userId"
+        element={
+          <AuthGuard>
+            <Chat />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <AuthGuard>
+            <Connections />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <AuthGuard>
+            <Profile />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/requests"
+        element={
+          <AuthGuard>
+            <Requests />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/connections"
+        element={
+          <AuthGuard>
+            <Connections />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/sessions"
+        element={
+          <AuthGuard>
+            <Sessions />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/ai-mentor"
+        element={
+          <AuthGuard>
+            <AiMentor />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/ai-roadmap"
+        element={
+          <AuthGuard>
+            <LearningRoadmap />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/resume-review"
+        element={
+          <AuthGuard>
+            <ResumeReview />
+          </AuthGuard>
+        }
+      />
     </Routes>
   );
 }

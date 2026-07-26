@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import socket from "../socket";
 import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const notifRef = useRef(null);
 
-  // State
   const [userProfile, setUserProfile] = useState(null);
   const [chats, setChats] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -18,32 +19,28 @@ function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Dynamic Metrics State
   const [connectionsCount, setConnectionsCount] = useState(0);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [meetingsCount, setMeetingsCount] = useState(0);
 
-  // 🔹 Fetch Logged-in User Profile
   const fetchProfile = async () => {
     try {
       const res = await API.get("/users/profile");
       setUserProfile(res.data.user || null);
     } catch (err) {
-      console.log("Profile fetch error:", err);
+      console.error("Profile fetch error:", err);
     }
   };
 
-  // 🔹 Fetch chats
   const fetchChats = async () => {
     try {
       const res = await API.get("/chat/list");
       setChats(res.data.chats || []);
     } catch (err) {
-      console.log("Chats fetch error:", err);
+      console.error("Chats fetch error:", err);
     }
   };
 
-  // 🔹 Fetch matches
   const fetchMatches = async () => {
     try {
       const res = await API.get("/users/matches");
@@ -51,17 +48,15 @@ function Dashboard() {
       setMatches(data);
       return data;
     } catch (err) {
-      console.log("Matches fetch error:", err);
+      console.error("Matches fetch error:", err);
       return [];
     }
   };
 
-  // 🔹 Fetch request status
   const fetchStatus = async (users) => {
+    if (!users || users.length === 0) return;
     try {
-      const promises = users.map((user) =>
-        API.get(`/requests/status/${user._id}`)
-      );
+      const promises = users.map((user) => API.get(`/requests/status/${user._id}`));
       const responses = await Promise.all(promises);
 
       const map = {};
@@ -71,50 +66,48 @@ function Dashboard() {
 
       setStatusMap(map);
     } catch (err) {
-      console.log("Status fetch error:", err);
+      console.error("Status fetch error:", err);
     }
   };
 
-  // 🔹 Fetch notifications
   const fetchNotifications = async () => {
     try {
       const res = await API.get("/notifications");
-      setNotifications(res.data || []);
+      const items = Array.isArray(res.data) ? res.data : [];
+      const sorted = items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setNotifications(sorted);
     } catch (err) {
-      console.log("Notifications error:", err);
+      console.error("Notifications error:", err);
     }
   };
 
-  // 🔹 Fetch Real Connections Count
   const fetchConnectionsCount = async () => {
     try {
       const res = await API.get("/requests/accepted");
       const count = res.data.count ?? res.data.users?.length ?? 0;
       setConnectionsCount(count);
     } catch (err) {
-      console.log("Connections count error:", err);
+      console.error("Connections count error:", err);
     }
   };
 
-  // 🔹 Fetch Real Pending Requests Count
   const fetchPendingRequestsCount = async () => {
     try {
       const res = await API.get("/requests/my");
       const count = res.data.count ?? res.data.requests?.length ?? 0;
       setPendingRequestsCount(count);
     } catch (err) {
-      console.log("Pending requests count error:", err);
+      console.error("Pending requests count error:", err);
     }
   };
 
-  // 🔹 Fetch Real Meetings/Sessions Count
   const fetchMeetingsCount = async () => {
     try {
       const res = await API.get("/sessions/my");
       const count = res.data.sessions?.length ?? 0;
       setMeetingsCount(count);
     } catch (err) {
-      console.log("Meetings count error:", err);
+      console.error("Meetings count error:", err);
     }
   };
 
@@ -129,11 +122,10 @@ function Dashboard() {
       setShowNotifications(false);
       navigate("/requests");
     } catch (err) {
-      console.log(err);
+      console.error("Notification click error:", err);
     }
   };
 
-  // 🔹 Handle Messages navigation
   const handleMessagesClick = () => {
     if (chats && chats.length > 0) {
       const firstChat = chats.find((c) => c._id);
@@ -145,22 +137,76 @@ function Dashboard() {
     navigate("/connections");
   };
 
-  // 🔹 Handle Connect request
   const handleConnect = async (userId) => {
+    setStatusMap((prev) => ({ ...prev, [userId]: "loading" }));
+
     try {
       await API.post("/requests/send", { receiverId: userId });
       setStatusMap((prev) => ({ ...prev, [userId]: "sent" }));
     } catch (err) {
+      setStatusMap((prev) => ({ ...prev, [userId]: "none" }));
       const message = err.response?.data?.message;
       if (message === "Request already exists between users") {
         setStatusMap((prev) => ({ ...prev, [userId]: "sent" }));
         return;
       }
-      console.log(message);
+      console.error("Connect error:", message);
     }
   };
 
-  // 🔹 Load initial data
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+      navigate("/");
+    }
+  };
+
+  const handleAiWorkspaceClick = () => {
+    const el = document.getElementById("ai-workspace");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/ai-mentor");
+    }
+  };
+
+  const getRelativeTime = (timestamp) => {
+    if (!timestamp) return "Just now";
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return "Just now";
+
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffSec < 10) return "Just now";
+    if (diffSec < 60) return `${diffSec} sec ago`;
+    if (diffMin < 60) return `${diffMin} min ago`;
+    if (diffHr < 24) return `${diffHr} hr ago`;
+    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const filteredMatches = matches.filter((u) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const name = (u.username || u.name || "").toLowerCase();
+    const skillsH = (u.skillsHave || u.skillsProficient || []).join(" ").toLowerCase();
+    const skillsW = (u.skillsWant || u.skillsLearning || []).join(" ").toLowerCase();
+    return name.includes(q) || skillsH.includes(q) || skillsW.includes(q);
+  });
+
+  const userName = userProfile?.username || userProfile?.name || "User";
+  const userInitials = userName.substring(0, 2).toUpperCase();
+  const messagesCount = chats.length;
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -177,7 +223,7 @@ function Dashboard() {
           await fetchStatus(matchesData);
         }
       } catch (err) {
-        console.log("Load data error:", err);
+        console.error("Load data error:", err);
       } finally {
         setLoading(false);
       }
@@ -185,39 +231,68 @@ function Dashboard() {
     loadData();
   }, []);
 
-  // 🔹 Logout
-  const handleLogout = async () => {
-    try {
-      await API.post("/auth/logout");
-      navigate("/");
-    } catch (err) {
-      console.log(err);
+  useEffect(() => {
+    const currentUserId = localStorage.getItem("userId");
+    if (currentUserId) {
+      socket.emit("join", currentUserId);
     }
-  };
+  }, []);
 
-  // 🔹 Scroll to AI Workspace
-  const handleAiWorkspaceClick = () => {
-    const el = document.getElementById("ai-workspace");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    } else {
-      navigate("/ai-mentor");
+  useEffect(() => {
+    const handleConnect = () => {
+      const currentUserId = localStorage.getItem("userId");
+      if (currentUserId) {
+        socket.emit("join", currentUserId);
+      }
+    };
+
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleNewNotification = (notification) => {
+      if (!notification || !notification._id) return;
+      setNotifications((prev) => {
+        const exists = prev.some((n) => n._id === notification._id);
+        if (exists) return prev;
+        return [notification, ...prev];
+      });
+      setPendingRequestsCount((prev) => prev + 1);
+    };
+
+    const handleRequestUpdated = () => {
+      fetchPendingRequestsCount();
+      fetchConnectionsCount();
+    };
+
+    socket.on("newNotification", handleNewNotification);
+    socket.on("requestUpdated", handleRequestUpdated);
+
+    return () => {
+      socket.off("newNotification", handleNewNotification);
+      socket.off("requestUpdated", handleRequestUpdated);
+    };
+  }, [fetchPendingRequestsCount, fetchConnectionsCount]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
-  };
 
-  // 🔹 Filter matches based on search query
-  const filteredMatches = matches.filter((u) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    const name = (u.username || u.name || "").toLowerCase();
-    const skillsH = (u.skillsHave || u.skillsProficient || []).join(" ").toLowerCase();
-    const skillsW = (u.skillsWant || u.skillsLearning || []).join(" ").toLowerCase();
-    return name.includes(q) || skillsH.includes(q) || skillsW.includes(q);
-  });
-
-  const userName = userProfile?.username || userProfile?.name || "User";
-  const userInitials = userName.substring(0, 2).toUpperCase();
-  const messagesCount = chats.length;
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
 
   if (loading) {
     return (
@@ -231,7 +306,6 @@ function Dashboard() {
 
   return (
     <div className={`sd-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
-      {/* Backdrop for Mobile Sidebar Drawer */}
       {mobileMenuOpen && (
         <div
           className="sd-backdrop"
@@ -239,10 +313,8 @@ function Dashboard() {
         />
       )}
 
-      {/* ── 1. COLLAPSIBLE LEFT SIDEBAR ───────────────────────────────────── */}
       <aside className={`sd-sidebar ${sidebarCollapsed ? "collapsed" : ""} ${mobileMenuOpen ? "mobile-open" : ""}`}>
         <div className="sd-sidebar-top">
-          {/* Logo & Brand */}
           <div className="sd-brand">
             <div className="sd-logo-group" onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}>
               <div className="sd-logo-icon">⚡</div>
@@ -259,7 +331,6 @@ function Dashboard() {
             </button>
           </div>
 
-          {/* Navigation Links (Strictly 7 links as requested) */}
           <nav className="sd-nav-list">
             <button className="sd-nav-item active" onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }}>
               <div className="sd-nav-item-left">
@@ -323,7 +394,6 @@ function Dashboard() {
           </nav>
         </div>
 
-        {/* Sidebar Footer User Card */}
         <div className="sd-sidebar-footer">
           <div className="sd-user-card">
             <div className="sd-user-info-group">
@@ -336,20 +406,11 @@ function Dashboard() {
                 <span className="sd-user-role">Full Stack Developer</span>
               </div>
             </div>
-            <button
-              className="sd-logout-icon-btn"
-              onClick={handleLogout}
-              title="Logout"
-            >
-              ➔
-            </button>
           </div>
         </div>
       </aside>
 
-      {/* ── 2. MAIN WORKSPACE ─────────────────────────────────────────────── */}
       <div className="sd-main">
-        {/* Fixed Top Navbar */}
         <header className="sd-topbar">
           <div className="sd-topbar-left">
             <button
@@ -373,8 +434,7 @@ function Dashboard() {
           </div>
 
           <div className="sd-topbar-actions">
-            {/* Notifications Dropdown Button */}
-            <div className="sd-notif-wrapper">
+            <div className="sd-notif-wrapper" ref={notifRef}>
               <button
                 className="sd-icon-btn"
                 onClick={handleBellClick}
@@ -411,22 +471,18 @@ function Dashboard() {
               )}
             </div>
 
-            {/* Profile Avatar Quick Link */}
             <div className="sd-user-chip" onClick={() => navigate("/profile")}>
               <div className="sd-chip-avatar">{userInitials}</div>
               <span className="sd-chip-name">{userName}</span>
             </div>
 
-            {/* Logout Button */}
             <button className="sd-btn-logout" onClick={handleLogout}>
               Logout
             </button>
           </div>
         </header>
 
-        {/* Content Container (Maximum 6 Sections) */}
         <div className="sd-content-container">
-          {/* SECTION 1: WELCOME HERO */}
           <section className="sd-hero-card">
             <div className="sd-hero-left">
               <div className="sd-hero-tag">⚡ SKILLSWAP SAAS PLATFORM</div>
@@ -444,9 +500,7 @@ function Dashboard() {
             <div className="sd-hero-illustration">👨‍💻</div>
           </section>
 
-          {/* SECTION 2: STATS ROW (4 CARDS ONLY) */}
           <section className="sd-stats-grid">
-            {/* Card 1: Connections */}
             <div
               className="sd-stat-card"
               onClick={() => navigate("/connections")}
@@ -460,7 +514,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Card 2: Active Chats */}
             <div
               className="sd-stat-card"
               onClick={handleMessagesClick}
@@ -476,7 +529,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Card 3: Scheduled Meetings */}
             <div
               className="sd-stat-card"
               onClick={() => navigate("/sessions")}
@@ -492,7 +544,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Card 4: Skill Matches */}
             <div
               className="sd-stat-card"
               onClick={() => navigate("/connections")}
@@ -507,7 +558,6 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* SECTION 3: SUGGESTED USERS */}
           <section className="sd-section">
             <div className="sd-section-header">
               <h2 className="sd-section-title">Suggested Learning Partners 🔥</h2>
@@ -589,6 +639,10 @@ function Dashboard() {
                           <button className="sd-btn-disabled" disabled>
                             Pending ⏳
                           </button>
+                        ) : st === "loading" ? (
+                          <button className="sd-btn-disabled" disabled>
+                            Sending...
+                          </button>
                         ) : (
                           <button
                             className="sd-btn-accent"
@@ -605,7 +659,6 @@ function Dashboard() {
             )}
           </section>
 
-          {/* SECTION 4: AI WORKSPACE (SINGLE UNIFIED SECTION) */}
           <section className="sd-section" id="ai-workspace">
             <div className="sd-section-header">
               <div>
@@ -617,7 +670,6 @@ function Dashboard() {
             </div>
 
             <div className="sd-ai-workspace-grid">
-              {/* Feature 1: AI Mentor */}
               <div
                 className="sd-ai-feature-card"
                 onClick={() => navigate("/ai-mentor")}
@@ -634,7 +686,6 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Feature 2: AI Roadmap */}
               <div
                 className="sd-ai-feature-card"
                 onClick={() => navigate("/ai-roadmap")}
@@ -651,7 +702,6 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Feature 3: Resume Analyzer */}
               <div
                 className="sd-ai-feature-card"
                 onClick={() => navigate("/resume-review")}
@@ -670,9 +720,7 @@ function Dashboard() {
             </div>
           </section>
 
-          {/* TWO COLUMN GRID FOR SECTIONS 5 & 6 */}
           <div className="sd-bottom-grid">
-            {/* SECTION 5: UPCOMING MEETINGS */}
             <section className="sd-card-panel">
               <div className="sd-section-header">
                 <h3 className="sd-section-title" style={{ fontSize: "1.1rem" }}>
@@ -704,7 +752,6 @@ function Dashboard() {
               </div>
             </section>
 
-            {/* SECTION 6: RECENT ACTIVITY */}
             <section className="sd-card-panel">
               <div className="sd-section-header">
                 <h3 className="sd-section-title" style={{ fontSize: "1.1rem" }}>
@@ -720,42 +767,22 @@ function Dashboard() {
 
               <div className="sd-activity-list">
                 {notifications.length > 0 ? (
-                  notifications.slice(0, 3).map((n, idx) => (
-                    <div key={n._id || idx} className="sd-activity-item">
+                  notifications.slice(0, 3).map((n) => (
+                    <div key={n._id} className="sd-activity-item">
                       <div className="sd-activity-avatar">
                         {(n.text || "N").substring(0, 1).toUpperCase()}
                       </div>
                       <div className="sd-activity-info">
                         <span className="sd-activity-text">{n.text}</span>
-                        <span className="sd-activity-time">Just now</span>
+                        <span className="sd-activity-time">{getRelativeTime(n.createdAt)}</span>
                       </div>
                       <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
                     </div>
                   ))
                 ) : (
-                  <>
-                    <div className="sd-activity-item">
-                      <div className="sd-activity-avatar" style={{ color: "#F97316" }}>S</div>
-                      <div className="sd-activity-info">
-                        <span className="sd-activity-text">
-                          <strong>Sarah</strong> accepted your connection request
-                        </span>
-                        <span className="sd-activity-time">2h ago</span>
-                      </div>
-                      <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
-                    </div>
-
-                    <div className="sd-activity-item">
-                      <div className="sd-activity-avatar" style={{ color: "#F97316" }}>A</div>
-                      <div className="sd-activity-info">
-                        <span className="sd-activity-text">
-                          <strong>Alex</strong> sent you a connection request
-                        </span>
-                        <span className="sd-activity-time">5h ago</span>
-                      </div>
-                      <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
-                    </div>
-                  </>
+                  <div className="sd-empty-state" style={{ padding: "1.5rem" }}>
+                    <p className="sd-empty-desc" style={{ margin: 0 }}>No recent activity yet. Start by sending a connection request!</p>
+                  </div>
                 )}
               </div>
             </section>
