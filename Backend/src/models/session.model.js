@@ -17,24 +17,35 @@ const sessionSchema = new mongoose.Schema(
     topic: {
       type: String,
       required: true,
+      trim: true,
     },
 
     date: {
       type: String,
+      required: true,
+      trim: true,
     },
 
     time: {
       type: String,
+      required: true,
+      trim: true,
     },
 
     meetLink: {
       type: String,
+      trim: true,
     },
 
     status: {
       type: String,
-      enum: ["pending", "accepted", "completed"],
+      enum: ["pending", "accepted", "rejected", "completed", "cancelled"],
       default: "pending",
+    },
+
+    cancelledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }
