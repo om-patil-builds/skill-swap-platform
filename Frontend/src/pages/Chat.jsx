@@ -25,6 +25,7 @@ function Chat() {
 
   const bottomRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const prevUserIdRef = useRef(null);
 
   const fetchMessages = async () => {
     try {
@@ -54,6 +55,13 @@ function Chat() {
 
   useEffect(() => {
     setLoading(true);
+    setTyping(false);
+    clearTimeout(typingTimeoutRef.current);
+    // If switching FROM a previous chat, tell that chat's receiver we stopped typing
+    if (prevUserIdRef.current && prevUserIdRef.current !== userId) {
+      socket.emit("stopTyping", { senderId: currentUserId, receiverId: prevUserIdRef.current });
+    }
+    prevUserIdRef.current = userId;
     fetchMessages();
     fetchUser();
     socket.emit("join", currentUserId);
@@ -63,28 +71,19 @@ function Chat() {
     const handleConnect = () => {
       socket.emit("join", currentUserId);
     };
-
     socket.on("connect", handleConnect);
-
     return () => {
       socket.off("connect", handleConnect);
+      // Emit stopTyping when leaving/unmounting the chat
+      clearTimeout(typingTimeoutRef.current);
+      if (userId) {
+        socket.emit("stopTyping", { senderId: currentUserId, receiverId: userId });
+      }
     };
-  }, [currentUserId]);
+  }, [currentUserId, userId]);
 
   useEffect(() => {
-    const handleConnect = () => {
-      socket.emit("join", currentUserId);
-    };
-
-    socket.on("connect", handleConnect);
-
-    return () => {
-      socket.off("connect", handleConnect);
-    };
-  }, [currentUserId]);
-
-  useEffect(() => {
-    socket.on("receiveMessage", (data) => {
+    const handleReceiveMessage = (data) => {
       setMessages((prev) => {
         const exists = prev.some((msg) => msg._id === data._id);
         if (exists) return prev;
@@ -105,27 +104,46 @@ function Chat() {
 
         return [...prev, data];
       });
-    });
+    };
 
-    socket.on("onlineUsers", (users) => {
+    const handleOnlineUsers = (users) => {
       setOnlineUsers(users);
-    });
+    };
 
-    socket.on("typing", () => {
-      setTyping(true);
-    });
+    const handleTypingEvent = ({ senderId, receiverId }) => {
+      // Only show indicator if the OTHER user (userId) is typing TO me (currentUserId)
+      if (
+        String(senderId) === String(userId) &&
+        String(receiverId) === String(currentUserId)
+      ) {
+        setTyping(true);
+      }
+    };
 
-    socket.on("stopTyping", () => {
-      setTyping(false);
-    });
+    const handleStopTyping = ({ senderId, receiverId } = {}) => {
+      // Only hide indicator if the OTHER user (userId) stopped typing TO me (currentUserId)
+      if (
+        String(senderId) === String(userId) &&
+        String(receiverId) === String(currentUserId)
+      ) {
+        setTyping(false);
+      }
+    };
+
+    socket.on("receiveMessage", handleReceiveMessage);
+    socket.on("onlineUsers", handleOnlineUsers);
+    socket.on("typing", handleTypingEvent);
+    socket.on("stopTyping", handleStopTyping);
 
     return () => {
-      socket.off("receiveMessage");
-      socket.off("onlineUsers");
-      socket.off("typing");
-      socket.off("stopTyping");
+      socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("onlineUsers", handleOnlineUsers);
+      socket.off("typing", handleTypingEvent);
+      socket.off("stopTyping", handleStopTyping);
+      clearTimeout(typingTimeoutRef.current);
+      setTyping(false);
     };
-  }, []);
+  }, [userId, currentUserId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -151,6 +169,10 @@ function Chat() {
       status: "sent",
     };
 
+    clearTimeout(typingTimeoutRef.current);
+    setTyping(false);
+    socket.emit("stopTyping", { senderId: currentUserId, receiverId: userId });
+
     setMessages((prev) => [...prev, tempMsg]);
     setText("");
     setSending(true);
@@ -167,16 +189,20 @@ function Chat() {
 
   const handleTyping = (value) => {
     setText(value);
-    socket.emit("typing", {
-      sender: currentUserId,
-      receiver: userId,
-    });
 
+    if (!value.trim()) {
+      // User cleared the input — immediately stop typing indicator
+      clearTimeout(typingTimeoutRef.current);
+      socket.emit("stopTyping", { senderId: currentUserId, receiverId: userId });
+      return;
+    }
+
+    socket.emit("typing", { senderId: currentUserId, receiverId: userId });
+
+    // Auto-stop after 800ms of inactivity
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("stopTyping", {
-        receiver: userId,
-      });
+      socket.emit("stopTyping", { senderId: currentUserId, receiverId: userId });
     }, 800);
   };
 
@@ -321,8 +347,6 @@ function Chat() {
             </div>
 
             <div className="msg-body">
-              <div className="msg-sender-name">{userName}</div>
-
               <div className="msg-bubble">
                 <div className="msg-text">typing...</div>
               </div>

@@ -54,12 +54,13 @@ function initializeSocket(server, frontendUrl) {
       }
     });
 
-    socket.on("typing", ({ sender, receiver }) => {
-      io.to(receiver).emit("typing", { sender });
+    socket.on("typing", ({ senderId, receiverId }) => {
+      // Emit ONLY to the receiver's personal room — sender never sees their own indicator
+      io.to(receiverId).emit("typing", { senderId, receiverId });
     });
 
-    socket.on("stopTyping", ({ receiver }) => {
-      io.to(receiver).emit("stopTyping");
+    socket.on("stopTyping", ({ senderId, receiverId }) => {
+      io.to(receiverId).emit("stopTyping", { senderId, receiverId });
     });
 
     socket.on("disconnect", () => {
