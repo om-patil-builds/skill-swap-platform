@@ -340,20 +340,6 @@ function Chat() {
           })
         )}
 
-        {typing && (
-          <div className="msg-row msg-received">
-            <div className="msg-avatar">
-              {userName?.charAt(0)?.toUpperCase()}
-            </div>
-
-            <div className="msg-body">
-              <div className="msg-bubble">
-                <div className="msg-text">typing...</div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div ref={bottomRef}></div>
       </div>
 
