@@ -50,6 +50,14 @@ function App() {
         }
       />
       <Route
+        path="/profile/:id"
+        element={
+          <AuthGuard>
+            <Profile />
+          </AuthGuard>
+        }
+      />
+      <Route
         path="/requests"
         element={
           <AuthGuard>

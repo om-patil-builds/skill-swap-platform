@@ -1,6 +1,6 @@
 import "./ProfileCard.css";
 
-function ProfileCard({ user, setEdit }) {
+function ProfileCard({ user, setEdit, isOwnProfile = true }) {
   const skillsHave = Array.isArray(user.skillsHave) ? user.skillsHave : [];
   const skillsWant = Array.isArray(user.skillsWant) ? user.skillsWant : [];
   const initials = (user.username || "U")
@@ -66,9 +66,11 @@ function ProfileCard({ user, setEdit }) {
             </div>
           </div>
 
-          <button className="edit-btn" onClick={() => setEdit(true)}>
-            Edit Profile
-          </button>
+          {isOwnProfile && (
+            <button className="edit-btn" onClick={() => setEdit(true)}>
+              Edit Profile
+            </button>
+          )}
         </div>
       </div>
     </div>
