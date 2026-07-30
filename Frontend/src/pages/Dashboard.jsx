@@ -623,7 +623,7 @@ function Dashboard() {
                       <div className="sd-card-actions">
                         <button
                           className="sd-btn-outline"
-                          onClick={() => navigate("/profile")}
+                          onClick={() => navigate(`/profile/${u._id}`)}
                         >
                           View Profile
                         </button>
