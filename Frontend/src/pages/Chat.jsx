@@ -279,21 +279,26 @@ function Chat() {
           <div className="loading-state">Loading...</div>
         ) : (
           messages.map((msg) => {
-            const mine = isMe(msg.sender);
+            const senderId = typeof msg.sender === "object" && msg.sender
+              ? String(msg.sender._id)
+              : String(msg.sender || "");
+            const mine = String(senderId) === String(currentUserId);
 
             return (
               <div
                 key={msg._id}
                 className={`msg-row ${mine ? "msg-sent" : "msg-received"}`}
               >
-                <div className="msg-avatar">
-                  {mine ? "M" : userName?.charAt(0)?.toUpperCase()}
-                </div>
+                {mine && <div className="msg-avatar">M</div>}
 
                 <div className="msg-body">
-                  <div className="msg-sender-name">
-                    {mine ? "Me" : msg.sender?.username || userName}
-                  </div>
+                  {!mine && (
+                    <div className="msg-sender-name">
+                      {(typeof msg.sender === "object" && msg.sender?.username)
+                        ? msg.sender.username
+                        : (msg.senderName || msg.senderUsername || userName || "User")}
+                    </div>
+                  )}
 
                   <div
                     className="msg-bubble"
