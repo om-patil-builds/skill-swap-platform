@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const mongoose = require("mongoose");
+const cloudinary = require("../config/cloudinary");
 
 
 async function updateProfile(req, res) {
@@ -154,8 +155,75 @@ const getUserById = async (req, res) => {
   }
 };
 
+async function uploadProfilePicture(req, res) {
+  try {
+    // DEBUG 1 — auth
+    console.log("[DEBUG] req.user:", req.user);
 
+    const userId = req.user.id;
 
+    // DEBUG 2 — multer file
+    console.log("[DEBUG] req.file:", req.file
+      ? { fieldname: req.file.fieldname, mimetype: req.file.mimetype, size: req.file.size, hasBuffer: !!req.file.buffer }
+      : "MISSING"
+    );
 
-module.exports = { updateProfile ,   getMatches ,   getMutualMatches , getUserById
- };
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // DEBUG 3 — cloudinary env vars
+    console.log("[DEBUG] CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+    console.log("[DEBUG] CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
+    console.log("[DEBUG] CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "Present" : "MISSING");
+
+    // Function to stream image buffer to Cloudinary
+    const uploadToCloudinary = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "profile_pictures" },
+          (error, result) => {
+            if (error) {
+              // DEBUG 4 — cloudinary error detail
+              console.error("[DEBUG] Cloudinary stream error:", JSON.stringify(error));
+              return reject(error);
+            }
+            // DEBUG 5 — cloudinary success
+            console.log("[DEBUG] Cloudinary upload success, url:", result.secure_url);
+            resolve(result);
+          }
+        );
+        uploadStream.end(fileBuffer);
+      });
+    };
+
+    const uploadResult = await uploadToCloudinary(req.file.buffer);
+
+    // Save to user.profileImage in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profileImage: uploadResult.secure_url },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Profile picture uploaded successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("[DEBUG] uploadProfilePicture caught error:", error);
+    res.status(500).json({ message: "Server error during upload" });
+  }
+}
+
+module.exports = { 
+  updateProfile, 
+  getMatches, 
+  getMutualMatches, 
+  getUserById,
+  uploadProfilePicture
+};

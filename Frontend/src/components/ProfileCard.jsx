@@ -1,8 +1,14 @@
+import { useState } from "react";
+import API from "../services/api";
 import "./ProfileCard.css";
 
-function ProfileCard({ user, setEdit, isOwnProfile = true }) {
+function ProfileCard({ user, setEdit, isOwnProfile = true, refresh }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
   const skillsHave = Array.isArray(user.skillsHave) ? user.skillsHave : [];
   const skillsWant = Array.isArray(user.skillsWant) ? user.skillsWant : [];
+  
   const initials = (user.username || "U")
     .split(" ")
     .map((part) => part[0])
@@ -10,10 +16,78 @@ function ProfileCard({ user, setEdit, isOwnProfile = true }) {
     .slice(0, 2)
     .toUpperCase();
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Client-side validations
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      setError("Only JPG, JPEG, PNG, and WEBP images are allowed.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("File size must be less than 2MB.");
+      return;
+    }
+
+    setError("");
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("profileImage", file);
+
+    try {
+      await API.put("/users/profile-picture", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (refresh) {
+        await refresh();
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.message || "Failed to upload profile picture. Please try again.";
+      setError(errMsg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="profile-container">
       <div className="profile-card">
-        <div className="profile-avatar">{initials}</div>
+        <div className="profile-header-section">
+          <div className="profile-avatar-container">
+            <div className="profile-avatar">
+              {user.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.username}
+                  className="profile-avatar-img"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            {isOwnProfile && (
+              <label className="upload-avatar-label">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  disabled={uploading}
+                />
+                <span className={`upload-avatar-btn ${uploading ? "disabled" : ""}`}>
+                  {uploading ? "Uploading..." : "Change Photo"}
+                </span>
+              </label>
+            )}
+          </div>
+          {error && <div className="profile-upload-error">{error}</div>}
+        </div>
 
         <div className="profile-card-body">
           <p className="profile-label">Professional overview</p>

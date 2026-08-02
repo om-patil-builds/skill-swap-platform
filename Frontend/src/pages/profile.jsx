@@ -78,7 +78,7 @@ function Profile() {
         {edit && isOwnProfile ? (
           <EditProfileForm user={user} setEdit={setEdit} refresh={fetchProfile} />
         ) : (
-          <ProfileCard user={user} setEdit={setEdit} isOwnProfile={isOwnProfile} />
+          <ProfileCard user={user} setEdit={setEdit} isOwnProfile={isOwnProfile} refresh={fetchProfile} />
         )}
       </div>
     </div>
