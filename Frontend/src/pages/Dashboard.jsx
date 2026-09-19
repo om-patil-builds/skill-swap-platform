@@ -173,27 +173,6 @@ function Dashboard() {
     }
   };
 
-  const getRelativeTime = (timestamp) => {
-    if (!timestamp) return "Just now";
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return "Just now";
-
-    const now = new Date();
-    const diffMs = now - date;
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHr = Math.floor(diffMin / 60);
-    const diffDay = Math.floor(diffHr / 24);
-
-    if (diffSec < 10) return "Just now";
-    if (diffSec < 60) return `${diffSec} sec ago`;
-    if (diffMin < 60) return `${diffMin} min ago`;
-    if (diffHr < 24) return `${diffHr} hr ago`;
-    if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
-
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  };
-
   const filteredMatches = matches.filter((u) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
@@ -720,73 +699,36 @@ function Dashboard() {
             </div>
           </section>
 
-          <div className="sd-bottom-grid">
-            <section className="sd-card-panel">
-              <div className="sd-section-header">
-                <h3 className="sd-section-title" style={{ fontSize: "1.1rem" }}>
-                  Upcoming Meetings 📅
-                </h3>
-                <button
-                  className="sd-btn-link"
-                  onClick={() => navigate("/sessions")}
-                >
-                  View Schedule →
-                </button>
-              </div>
+          <section className="sd-card-panel">
+            <div className="sd-section-header">
+              <h3 className="sd-section-title" style={{ fontSize: "1.1rem" }}>
+                Upcoming Meetings 📅
+              </h3>
+              <button
+                className="sd-btn-link"
+                onClick={() => navigate("/sessions")}
+              >
+                View Schedule →
+              </button>
+            </div>
 
-              <div className="sd-empty-state">
-                <div className="sd-empty-icon">📆</div>
-                <h4 className="sd-empty-title">
-                  {meetingsCount > 0 ? `${meetingsCount} Sessions Booked` : "No upcoming meetings today"}
-                </h4>
-                <p className="sd-empty-desc">
-                  Schedule 1-on-1 skill swap sessions with your connections to learn interactively.
-                </p>
-                <button
-                  className="sd-btn-primary"
-                  style={{ fontSize: "0.85rem", padding: "0.6rem 1.2rem", marginTop: "0.3rem" }}
-                  onClick={() => navigate("/sessions")}
-                >
-                  Schedule Session 📅
-                </button>
-              </div>
-            </section>
-
-            <section className="sd-card-panel">
-              <div className="sd-section-header">
-                <h3 className="sd-section-title" style={{ fontSize: "1.1rem" }}>
-                  Recent Activity ⚡
-                </h3>
-                <button
-                  className="sd-btn-link"
-                  onClick={() => navigate("/requests")}
-                >
-                  View All →
-                </button>
-              </div>
-
-              <div className="sd-activity-list">
-                {notifications.length > 0 ? (
-                  notifications.slice(0, 3).map((n) => (
-                    <div key={n._id} className="sd-activity-item">
-                      <div className="sd-activity-avatar">
-                        {(n.text || "N").substring(0, 1).toUpperCase()}
-                      </div>
-                      <div className="sd-activity-info">
-                        <span className="sd-activity-text">{n.text}</span>
-                        <span className="sd-activity-time">{getRelativeTime(n.createdAt)}</span>
-                      </div>
-                      <span style={{ color: "#22C55E", fontSize: "0.85rem" }}>✓</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="sd-empty-state" style={{ padding: "1.5rem" }}>
-                    <p className="sd-empty-desc" style={{ margin: 0 }}>No recent activity yet. Start by sending a connection request!</p>
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
+            <div className="sd-empty-state">
+              <div className="sd-empty-icon">📆</div>
+              <h4 className="sd-empty-title">
+                {meetingsCount > 0 ? `${meetingsCount} Sessions Booked` : "No upcoming meetings today"}
+              </h4>
+              <p className="sd-empty-desc">
+                Schedule 1-on-1 skill swap sessions with your connections to learn interactively.
+              </p>
+              <button
+                className="sd-btn-primary"
+                style={{ fontSize: "0.85rem", padding: "0.6rem 1.2rem", marginTop: "0.3rem" }}
+                onClick={() => navigate("/sessions")}
+              >
+                Schedule Session 📅
+              </button>
+            </div>
+          </section>
         </div>
       </div>
     </div>
