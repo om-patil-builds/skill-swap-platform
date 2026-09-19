@@ -22,13 +22,5 @@ export default defineConfig({
   },
   build: {
     sourcemap: "hidden",
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          vendor: ["react-router-dom", "axios", "socket.io-client"],
-        },
-      },
-    },
   },
 });
