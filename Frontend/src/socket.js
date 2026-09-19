@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 import { useEffect, useRef } from "react";
 
-const socket = io("/", {
+const socket = io(import.meta.env.VITE_API_URL || "/", {
   withCredentials: true,
   path: "/socket.io",
   autoConnect: true,
