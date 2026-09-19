@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Requests from "./pages/Requests";
 import Connections from "./pages/Connections";
 import Sessions from "./pages/Sessions";
